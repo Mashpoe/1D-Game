@@ -1,0 +1,69 @@
+<html>
+    <head>
+        <style>
+            html, body {
+                margin: 0px;
+                text-align: center;
+                background-color: black;
+                color: white;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+
+            .button {
+                width: 33%;
+                box-sizing: border-box;
+                border: 10px solid #000;
+                display: inline-block;
+                height: 150px;
+                text-align: center;
+                font-size: 50px;
+                padding-top: 40px;
+                user-select: none;
+            }
+
+            .button:hover {
+                background-color: #555;
+            }
+        </style>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    </head>
+    <body>
+        <br>
+        <canvas id="canvas2d"></canvas>
+        <br>
+        <br>
+        Level: <span id="level">Tutorial</span>
+        <br>
+        <br>
+        <canvas id="canvas1d"></canvas><!--
+        --><div class="button" id="buttonL">◀</div><!--
+        --><div class="button" id="buttonR">▶</div><!--
+        --><div class="button" id="buttonM">▲</div>
+        <br>
+        <input type="checkbox" id="anaglyph">
+        <label for="anaglyph">3D Anaglyph</label>
+        <br>
+        <input type="checkbox" id="show2d" checked>
+        <label for="show2d">Show 2D Display</label>
+        <br>
+        <lable for="quality">1D Render Quality:</lable>
+        <input type="range" min="1" max="10" value="8" class="slider" id="quality">
+        <br>
+        <br>
+        <span>Textures labeled "3D" are best for 3D anaglyph.</span>
+        <br>
+        <br>
+        <label for="texture">World Texture:</label>
+        <select id="texture">
+            <option value="0" selected>Gray Waves (3D)</option>
+            <option value="1">Blue-Green Waves</option>
+            <option value="2">Trippy</option>
+            <option value="3">Gray Stripes (3D)</option>
+            <option value="4">Yellow Stripes (3D)</option>
+            <option value="5">Solid Red</option>
+        </select>
+
+        <script src="script.js"></script>
+    </body>
+</html>
