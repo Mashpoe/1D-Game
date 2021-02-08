@@ -171,22 +171,42 @@ function clear(p, dir) {
         case 1: // up
             remove(p.x, p.y - 1)
             remove(p.x, p.y - 2)
-            p.y -= 2
+            remove(p.x, p.y - 3)
+            remove(p.x + 1, p.y - 1)
+            remove(p.x + 1, p.y - 2)
+            remove(p.x + 1, p.y - 3)
+            p.y -= 3
             break;
         case 2: // down
             remove(p.x, p.y + 1)
             remove(p.x, p.y + 2)
-            p.y += 2
+            remove(p.x, p.y + 3)
+            remove(p.x, p.y + 4)
+            remove(p.x + 1, p.y + 1)
+            remove(p.x + 1, p.y + 2)
+            remove(p.x + 1, p.y + 3)
+            remove(p.x + 1, p.y + 4)
+            p.y += 3
             break;
         case 3: // left
             remove(p.x - 1, p.y)
             remove(p.x - 2, p.y)
-            p.x -= 2
+            remove(p.x - 3, p.y)
+            remove(p.x - 1, p.y + 1)
+            remove(p.x - 2, p.y + 1)
+            remove(p.x - 3, p.y + 1)
+            p.x -= 3
             break;
         case 4: // right
             remove(p.x + 1, p.y)
             remove(p.x + 2, p.y)
-            p.x += 2
+            remove(p.x + 3, p.y)
+            remove(p.x + 4, p.y)
+            remove(p.x + 1, p.y + 1)
+            remove(p.x + 2, p.y + 1)
+            remove(p.x + 3, p.y + 1)
+            remove(p.x + 4, p.y + 1)
+            p.x += 3
             break;
         default:
             return
@@ -202,7 +222,7 @@ function available(x, y) {
 }
 
 function generateWorld(size) {
-    size = size * 2 + 1
+    size = size * 3 + 1
 
     // fill a 2d array
     world = []
@@ -224,16 +244,16 @@ function generateWorld(size) {
         for (let i = 0; i < pathways.length; ++i) {
             let p = pathways[i]
             let directions = []
-            if (available(p.x, p.y - 2)) {
+            if (available(p.x, p.y - 3)) {
                 directions.push(1) // up
             }
-            if (available(p.x, p.y + 2)) {
+            if (available(p.x, p.y + 4)) {
                 directions.push(2) // down
             }
-            if (available(p.x - 2, p.y)) {
+            if (available(p.x - 3, p.y)) {
                 directions.push(3) // left
             }
-            if (available(p.x + 2, p.y)) {
+            if (available(p.x + 4, p.y)) {
                 directions.push(4) // right
             }
 
@@ -261,6 +281,8 @@ function generateWorld(size) {
     world[maxPathway.y][maxPathway.x] = 2
 }
 
+
+let portalColor = {r: 255, g: 255, b: 255}
 // returns a color
 function castRay(px, py, direction) {
     // find where the ray intersects with the edge of the world
@@ -312,9 +334,8 @@ function castRay(px, py, direction) {
         if (world[rY][rX] != 0) {
 
             if (world[rY][rX] == 2) {
-                return {r: 255, g: 0, b: 255}
+                return portalColor
             }
-
 
             // find the closest two edges in the player's direction
             let leftEdge = rX * 16
@@ -411,7 +432,12 @@ function drawStage2d() {
     let centerX = canvasElem2d.width / 2
     let centerY = canvasElem2d.height / 2
     ctx2d.strokeStyle = "yellow"
-    ctx2d.fillStyle = "magenta"
+    // portal color
+    ctx2d.fillStyle = "rgb(" +
+        portalColor.r + "," +
+        portalColor.g + "," +
+        portalColor.b + ")"
+
     for (let y = 0; y < world.length; ++y) {
         for (let x = 0; x < world[y].length; ++x) {
             if (world[y][x] != 0) {
@@ -627,6 +653,7 @@ function checkCollision(movingHoriz) {
     }
 }
 
+let brightenPortal = false
 function update()
 {
     if (keys.right) {
@@ -653,6 +680,18 @@ function update()
     checkCollision(true)
     player.y += velocity.y
     checkCollision(false)
+
+    let portalAnimSpeed = 5
+    if (portalColor.r > 255 || portalColor.r < 0) {
+        brightenPortal = !brightenPortal
+    }
+
+    let newBrightness = portalColor.r +
+        (brightenPortal ? portalAnimSpeed : -portalAnimSpeed)
+
+    portalColor.r = newBrightness
+    portalColor.g = newBrightness
+    portalColor.b = newBrightness
 
 }
 
