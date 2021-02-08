@@ -9,8 +9,15 @@
                 font-family: Arial, Helvetica, sans-serif;
             }
 
+            .buttons {
+                font-size: 0px;
+                text-align: right;
+            }
+
             .button {
                 box-sizing: border-box;
+                display: inline-block;
+                width: 33.33%;
                 border-radius: 25px;
                 border: 10px solid #000;
                 text-align: center;
@@ -24,34 +31,17 @@
                 width: 100%;
                 font-size: 50px;
                 height: 70px;
+                overflow: hidden;
             }
 
             .button-label {
                 display: block;
                 width: 100%;
-                font-size: 20px;
+                font-size: 16px;
                 height: 30px;
-            }
-
-            .buttons {
-                display: table;
-                width: 100%;
-            }
-
-            .turn-buttons {
-                display: table-cell;
-                vertical-align: middle;
-                width: 66%;
-            }
-
-            .turn-buttons .button {
-                display: inline-block;
-                width: 50%;
-            }
-
-            .move-buttons {
-                display: table-cell;
-                width: 33%;
+                padding-top: 5px;
+                box-sizing: border-box;
+                overflow: hidden;
             }
         </style>
         <meta charset="UTF-8">
@@ -67,25 +57,20 @@
         <br>
         <canvas id="canvas1d"></canvas>
         <div class="buttons">
-            <div class="turn-buttons"><!--
-            --><div class="button" id="buttonL">
-                    <div class="button-icon">↶</div>
-                    <div class="button-label">turn left</div>
-                </div><!--  
-            --><div class="button" id="buttonR">
-                    <div class="button-icon">↷</div>
-                    <div class="button-label">turn right</div>
-                </div><!--
-        --></div>
-            <div class="move-buttons">
-                <div class="button" id="buttonF">
-                    <div class="button-label">move forward</div>
-                    <div class="button-icon">▲</div>
-                </div>
-                <div class="button" id="buttonB">
-                    <div class="button-icon">▼</div>
-                    <div class="button-label">move back</div>
-                </div>
+            <div class="button" id="buttonL">
+                <div class="button-icon">↶</div>
+                <div class="button-label">turn left</div>
+            </div><div class="button" id="buttonR">
+                <div class="button-icon">↷</div>
+                <div class="button-label">turn right</div>
+            </div>
+            <div class="button" id="buttonF">
+                <div class="button-label">move forward</div>
+                <div class="button-icon">▲</div>
+            </div>
+            <div class="button" id="buttonB">
+                <div class="button-icon">▼</div>
+                <div class="button-label">move back</div>
             </div>
         </div>
         <br>
