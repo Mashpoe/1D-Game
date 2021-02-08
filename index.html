@@ -10,19 +10,48 @@
             }
 
             .button {
-                width: 33%;
                 box-sizing: border-box;
+                border-radius: 25px;
                 border: 10px solid #000;
-                display: inline-block;
-                height: 150px;
                 text-align: center;
-                font-size: 50px;
-                padding-top: 40px;
+                font-size: 20px;
                 user-select: none;
+                background-color: #222;
             }
 
-            .button:hover {
-                background-color: #555;
+            .button-icon {
+                display: block;
+                width: 100%;
+                font-size: 50px;
+                height: 70px;
+            }
+
+            .button-label {
+                display: block;
+                width: 100%;
+                font-size: 20px;
+                height: 30px;
+            }
+
+            .buttons {
+                display: table;
+                width: 100%;
+            }
+
+            .turn-buttons {
+                display: table-cell;
+                vertical-align: middle;
+                width: 66%;
+            }
+
+            .turn-buttons .button {
+                display: inline-block;
+                width: 50%;
+            }
+
+            .move-buttons {
+                display: table-cell;
+                width: 33%;
             }
         </style>
         <meta charset="UTF-8">
@@ -36,10 +65,29 @@
         Level: <span id="level">Tutorial</span>
         <br>
         <br>
-        <canvas id="canvas1d"></canvas><!--
-        --><div class="button" id="buttonL">◀</div><!--
-        --><div class="button" id="buttonR">▶</div><!--
-        --><div class="button" id="buttonM">▲</div>
+        <canvas id="canvas1d"></canvas>
+        <div class="buttons">
+            <div class="turn-buttons"><!--
+            --><div class="button" id="buttonL">
+                    <div class="button-icon">↶</div>
+                    <div class="button-label">turn left</div>
+                </div><!--  
+            --><div class="button" id="buttonR">
+                    <div class="button-icon">↷</div>
+                    <div class="button-label">turn right</div>
+                </div><!--
+        --></div>
+            <div class="move-buttons">
+                <div class="button" id="buttonF">
+                    <div class="button-label">move forward</div>
+                    <div class="button-icon">▲</div>
+                </div>
+                <div class="button" id="buttonB">
+                    <div class="button-icon">▼</div>
+                    <div class="button-label">move back</div>
+                </div>
+            </div>
+        </div>
         <br>
         <input type="checkbox" id="anaglyph">
         <label for="anaglyph">3D Anaglyph</label>
@@ -60,7 +108,7 @@
             <option value="1">Blue-Green Waves</option>
             <option value="2">Trippy</option>
             <option value="3">Gray Stripes (3D)</option>
-            <option value="4">Yellow Stripes (3D)</option>
+            <option value="4" default>Yellow Stripes (3D)</option>
             <option value="5">Solid Red</option>
         </select>
 

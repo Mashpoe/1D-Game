@@ -91,16 +91,20 @@ let texIndex = 0
 function updateWorldTexture() {
     texIndex = parseInt(this.value)
 }
-document.getElementById("texture").onclick = updateWorldTexture
+document.getElementById("texture").onchange = updateWorldTexture
 updateWorldTexture.bind(document.getElementById("texture"))()
 
-let keys = {forward: false, left: false, right: false}
+let keys = {forward: false, backward: false, left: false, right: false}
 
 function updateKey(keyCode, value) {
     switch (keyCode) {
         case 38: // up key
         case 87: // W key; fallthrough
             keys.forward = value;
+            break;
+        case 40: // down key
+        case 83: // S key; fallthrough
+            keys.backward = value;
             break;
         case 37: // left key
         case 65: // A key; fallthrough
@@ -123,7 +127,8 @@ window.onkeyup = function(e) {
 
 let buttonL = document.getElementById("buttonL")
 let buttonR = document.getElementById("buttonR")
-let buttonM = document.getElementById("buttonM")
+let buttonF = document.getElementById("buttonF")
+let buttonB = document.getElementById("buttonB")
 // check for touch device
 if (("ontouchstart" in window) ||
     (navigator.maxTouchPoints > 0) ||
@@ -131,28 +136,44 @@ if (("ontouchstart" in window) ||
 {
     buttonL.ontouchstart = function() {
         keys.left = true
+        this.style.backgroundColor = "#555"
     }
     buttonL.ontouchend = function() {
         keys.left = false
+        this.style.backgroundColor = ""
     }
 
     buttonR.ontouchstart = function() {
         keys.right = true
+        this.style.backgroundColor = "#555"
     }
     buttonR.ontouchend = function() {
         keys.right = false
+        this.style.backgroundColor = ""
     }
 
-    buttonM.ontouchstart = function() {
+    buttonF.ontouchstart = function() {
         keys.forward = true
+        this.style.backgroundColor = "#555"
     }
-    buttonM.ontouchend = function() {
+    buttonF.ontouchend = function() {
         keys.forward = false
+        this.style.backgroundColor = ""
+    }
+
+    buttonB.ontouchstart = function() {
+        keys.backward = true
+        this.style.backgroundColor = "#555"
+    }
+    buttonB.ontouchend = function() {
+        keys.backward = false
+        this.style.backgroundColor = ""
     }
 } else {
     buttonL.style.display = "none"
     buttonR.style.display = "none"
-    buttonM.style.display = "none"
+    buttonF.style.display = "none"
+    buttonB.style.display = "none"
 }
 
 function remove(x, y) {
@@ -237,6 +258,8 @@ function generateWorld(size) {
 
     pathways.push({x: 1, y: 1, dist: 0})
     remove(1, 1)
+    remove(1, 2)
+    remove(2, 1)
 
     let maxPathway = pathways[0]
 
@@ -671,6 +694,9 @@ function update()
     if (keys.forward) {
         velocity.x += xComp * acc
         velocity.y += yComp * acc
+    } else if (keys.backward) {
+        velocity.x -= xComp * acc / 2
+        velocity.y -= yComp * acc / 2
     }
 
     velocity.x *= 1 - fric
