@@ -77,7 +77,7 @@ let renderQuality = 10
 function updateRenderQuality() {
     renderQuality = this.value
 }
-document.getElementById("quality").onclick = updateRenderQuality
+document.getElementById("quality").onchange = updateRenderQuality
 updateRenderQuality.bind(document.getElementById("quality"))()
 
 function updateCanvasSize() {
@@ -637,60 +637,85 @@ function checkCollision(movingHoriz) {
 }
 
 let brightenPortal = false
-function update()
-{
-    if (keys.right) {
-        angVel += angAcc
-    } else if (keys.left) {
-        angVel -= angAcc
-    }
-    angVel *= 1 - angFric;
 
-    direction += angVel
+// the standard timestep
+let stepSt = 20
+function update(timestep)
+{
+    // timestep ratio
+    let tr = timestep / stepSt
+
+    if (keys.right) {
+        angVel += angAcc * tr
+    } else if (keys.left) {
+        angVel -= angAcc * tr
+    }
+    angVel *= (1 - angFric * tr)
+
+    direction += angVel * tr
 
     let xComp = Math.cos(direction)
     let yComp = Math.sin(direction)
 
     if (keys.forward) {
-        velocity.x += xComp * acc
-        velocity.y += yComp * acc
+        velocity.x += xComp * acc * tr
+        velocity.y += yComp * acc * tr
     } else if (keys.backward) {
-        velocity.x -= xComp * acc / 2
-        velocity.y -= yComp * acc / 2
+        velocity.x -= xComp * acc / 2 * tr
+        velocity.y -= yComp * acc / 2 * tr
     }
 
-    velocity.x *= 1 - fric
-    velocity.y *= 1 - fric
+    velocity.x *= (1 - fric * tr)
+    velocity.y *= (1 - fric * tr)
     
-    player.x += velocity.x
-    checkCollision(true)
-    player.y += velocity.y
-    checkCollision(false)
+    // remaining velocity x and y
+    let rvx = Math.abs(velocity.x * tr)
+    let rvy = Math.abs(velocity.y * tr)
+    let xDir = velocity.x > 0 ? 1 : -1
+    let yDir = velocity.y > 0 ? 1 : -1
+    while(rvx > 0 || rvy > 0) {
+        if (rvx > 1) {
+            player.x += xDir
+            rvx -= 1
+        } else {
+            player.x += xDir * rvx
+            rvx = 0
+        }
+        checkCollision(true)
 
-    let portalAnimSpeed = 5
-    if (portalColor.r > 255 || portalColor.r < 0) {
-        brightenPortal = !brightenPortal
+        if (rvy > 1) {
+            player.y += yDir
+            rvy -= 1
+        } else {
+            player.y += yDir * rvy
+            rvy = 0
+        }
+        checkCollision(false)
     }
 
-    let newBrightness = portalColor.r +
-        (brightenPortal ? portalAnimSpeed : -portalAnimSpeed)
+    let portalAnimSpeed = 5 * tr
+    let brightness = portalColor.r
+    if (brightenPortal) {
+        brightness += portalAnimSpeed
+        if (brightness > 255) {
+            brightness = 255
+            brightenPortal = false
+        }
+    } else {
+        brightness -= portalAnimSpeed
+        if (brightness < 0) {
+            brightness = 0
+            brightenPortal = true
+        }
+    }
 
-    portalColor.r = newBrightness
-    portalColor.g = newBrightness
-    portalColor.b = newBrightness
+    portalColor.r = brightness
+    portalColor.g = brightness
+    portalColor.b = brightness
 
 }
 
-// fps counter
-// let frameDelays = []
-// let frameSum = 0
-
-let fpsCounterElem = document.getElementById("fpsCounter")
 let lastTime = Date.now()
-
-let physicsDelay = 1000 / 60 // run 60 times per sec
-
-let accumulator = 0
 function runGame() {
 
     render()
@@ -699,20 +724,7 @@ function runGame() {
     let delta = currentTime - lastTime
     lastTime = currentTime
 
-    accumulator += delta
-    while (accumulator > physicsDelay) {
-        accumulator -= physicsDelay
-        update()
-    }
-    
-    // frameDelays.push(delta)
-    // frameSum += delta
-    // if (frameDelays.length == 100) {
-    //     frameSum -= frameDelays[0]
-    //     frameDelays.splice(0, 1)
-    // }
-    // let avg = frameSum / frameDelays.length
-    //fpsCounterElem.innerHTML = (1000 / avg).toFixed(2) + " FPS"
+    update(delta)
 
     requestAnimationFrame(runGame)
 }
