@@ -25,14 +25,15 @@ let direction = 0.0 // direction in radians
 let velocity = {x: 0.0, y: 0.0}
 let angVel = 0.0 // angular velocity
 
-let acc = 0.01
-let fric = 0.05
+let acc = 0.005
+let fric = 0.03
 
-let angAcc = 0.01
-let angFric = 0.1
+let angAcc = 0.003
+let angFric = 0.05
 
-let tutorialMaxViewDist = 200
-let levelMaxViewDist = 100
+// view distance in blocks
+let tutorialMaxViewDist = 400 / 32
+let levelMaxViewDist = 200 / 32
 let maxViewDist = tutorialMaxViewDist
 
 let world = [
@@ -179,15 +180,11 @@ if (("ontouchstart" in window) ||
 function remove(x, y) {
     if (x >= 0 && y >= 0 && y < world.length && x < world[y].length) {
         world[y][x] = 0
-        console.log("removed")
         return
     }
-    console.log("not removed")
 }
 
 function clear(p, dir) {
-
-    console.log("clear")
     switch (dir) {
         case 1: // up
             remove(p.x, p.y - 1)
@@ -295,7 +292,6 @@ function generateWorld(size) {
                     maxPathway = pathways[i]
                 }
                 pathways.splice(i, 1)
-                console.log(pathways.length)
             }
         }
     }
@@ -304,154 +300,116 @@ function generateWorld(size) {
     world[maxPathway.y][maxPathway.x] = 2
 }
 
-
 let portalColor = {r: 255, g: 255, b: 255}
-// returns a color
-function castRay(px, py, direction) {
-    // find where the ray intersects with the edge of the world
-    let xComp = Math.cos(direction)
-    let yComp = Math.sin(direction)
+// casts a ray and returns the color of whatever it hits
+function castRay(px, py, dir) {
+    let xComp = Math.cos(dir)
+    let yComp = Math.sin(dir)
 
-    // find the corner of quadrant the ray is in
-    let cornerX = xComp > 0 ? world[0].length : 0
-    let cornerY = yComp > 0 ? world.length : 0
+    // slope of the line
+    let m = yComp / xComp
 
-    let cornerDistX = cornerX - px
-    let cornerDistY = cornerY - py
+    let rx = px
+    let ry = py
 
-    // find the exact pixel location
-    let endX
-    let endY
+    let facingRight = xComp >= 0
+    let xWorldEdge = facingRight ? world[0].length : -1
 
-    let tanCorner = cornerDistY / cornerDistX
-    let tanDir = yComp / xComp
-    if (Math.abs(tanCorner) < Math.abs(tanDir)) {
-        endY = cornerY
-        endX = px + xComp / yComp * cornerDistY
-    } else {
-        endX = cornerX
-        endY = py + tanDir * cornerDistX
-    }
+    let facingDown = yComp >= 0
+    let yWorldEdge = facingDown ? world.length : -1
 
-    // use Bresenham's algorithm until an intersection is found
-    let x0 = Math.floor(px * 16)
-    let x1 = Math.floor(endX * 16)
-    let y0 = Math.floor(py * 16)
-    let y1 = Math.floor(endY * 16)
+    while (true) {
+        // continue to the next block
 
-    let x = x0
-    let y = y0
+        // find out which block edge will be hit first
+        let nextX = facingRight ? Math.floor(rx) + 1 : Math.ceil(rx) - 1
+        let nextY = facingDown ? Math.floor(ry) + 1 : Math.ceil(ry) - 1
 
-    let dx = Math.abs(x1 - x)
-    let sx = x < x1 ? 1 : -1
-    let dy = Math.abs(y1 - y)
-    let sy = y < y1 ? 1 : -1;
-    let err = (dx > dy ? dx : -dy) / 2
-    let e2
+        let distX = Math.abs(nextX - rx)
+        let distY = Math.abs(nextY - ry)
 
-    for(;;) {
-        let rX = Math.floor(x / 16)
-        let rY = Math.floor(y / 16)
+        // coords of the current block
+        let bx
+        let by
 
-        // check for a collision
-        if (world[rY][rX] != 0) {
+        let facingVertEdge = distY / distX > Math.abs(m)
+        if (facingVertEdge) {
+            // vertical edge collision
+            rx = nextX
+            ry = py + (rx - px) * m
 
-            if (world[rY][rX] == 2) {
+            bx = facingRight ? rx : rx - 1
+            by = Math.floor(ry)
+        } else {
+            // horizontal edge collision
+            ry = nextY
+            rx = px + (ry - py) / m
+
+            by = facingDown ? ry : ry - 1
+            bx = Math.floor(rx)
+        }
+
+        // return black if we hit the world edge
+        if (bx == xWorldEdge || by == yWorldEdge) {
+            return {r: 0, g: 0, b: 0}
+        }
+
+        // check for a collsion in the current block
+        if (world[by][bx] != 0) {
+            let cX = canvasElem2d.width / 2
+            let cY = canvasElem2d.height / 2
+            
+            // ctx2d.beginPath()
+            // ctx2d.fillStyle = "orange"
+            // ctx2d.rect(cX + (bx - player.x) * 32, cY + (by - player.y) * 32, 32, 32)
+            // ctx2d.fill()
+
+            // ctx2d.beginPath()
+            // ctx2d.strokeStyle = "red"
+            // ctx2d.moveTo(cX, cY)
+            // ctx2d.lineTo(cX + (rx - player.x) * 32, cY + (ry - player.y) * 32)
+            // ctx2d.stroke()
+
+            if (world[by][bx] == 2) {
                 return portalColor
             }
 
-            // find the closest two edges in the player's direction
-            let leftEdge = rX * 16
-            let rightEdge = (rX + 1) * 16
-            let topEdge = rY * 16
-            let bottomEdge = (rY + 1) * 16
-
-            let facingLeftEdge, inBoundsX
-            if (xComp > 0) {
-                facingLeftEdge = x0 < leftEdge
-                inBoundsX = !facingLeftEdge
-            } else {
-                facingLeftEdge = x0 < rightEdge
-                inBoundsX = facingLeftEdge
-            }
-
-            let facingTopEdge, inBoundsY
-            if (yComp > 0) {
-                facingTopEdge = y0 < topEdge
-                inBoundsY = !facingTopEdge
-            } else {
-                facingTopEdge = y0 < bottomEdge
-                inBoundsY = facingTopEdge
-            }
-
-            let edgeX = facingLeftEdge ? leftEdge : rightEdge
-            let edgeY = facingTopEdge ? topEdge : bottomEdge
-
-            // find the exact position of the intersection
-            let tanTileCorner = Math.abs((edgeY - y0) / (edgeX - x0))
-            let tanIsGreater = tanTileCorner > Math.abs(tanDir)
-            let facingHoriz = inBoundsX == tanIsGreater || inBoundsY
-
-            let finalX, finalY
-            let color
-            // texture index
-            if (facingHoriz) {
-                let xDist = edgeX - x0
-                let yDist = (xDist / xComp) * yComp           
-                finalX = edgeX
-                finalY = yDist + y0
-
-                // where on the tile was the collision?
-                let texY = (finalY - topEdge) / 16
-                if (!facingLeftEdge) {
-                    texY = 1.0 - texY
+            // find where the collision was on the tile
+            let tilePos
+            if (facingVertEdge) {
+                tilePos = ry % 1
+                if (facingRight) {
+                    tilePos = 1 - tilePos
                 }
-                texY = Math.max(texY, 0)
-                texY = texY < 1 ? texY : 0
-                let colorIndex = Math.floor(texY * textures1D[texIndex].length)
-                color = textures1D[texIndex][colorIndex]
             } else {
-                let yDist = edgeY - y0
-                let xDist = (yDist / yComp) * xComp
-                finalX = x0 + xDist
-                finalY = edgeY
-
-                // where on the tile was the collision?
-                let texX = (finalX - leftEdge) / 16;
-                if (facingTopEdge) {
-                    texX = 1.0 - texX
+                tilePos = rx % 1
+                if (facingDown) {
+                    tilePos = 1 - tilePos
                 }
-                texX = Math.max(texX, 0)
-                texX = texX < 1 ? texX : 0
-                let colorIndex = Math.floor(texX * textures1D[texIndex].length)
-                color = textures1D[texIndex][colorIndex]
             }
+            let colorIndex = Math.floor(tilePos * textures1D[texIndex].length)
+            color = textures1D[texIndex][colorIndex]
 
-            let distance = Math.sqrt((finalX - x0) ** 2 + (finalY - y0) ** 2)
+            let distance = Math.sqrt((rx - px) ** 2 + (ry - py) ** 2)
 
-            let colorIntensity = 1.0 - (Math.min(distance, maxViewDist) / maxViewDist)
+            let brightness = 1.0 - (Math.min(distance, maxViewDist) / maxViewDist)
             if (anaglyph) {
-                colorIntensity = Math.min(1.0, colorIntensity + 0.3)
+                brightness = Math.min(1.0, brightness + 0.3)
             }
             return {
-                r: color.r * colorIntensity,
-                g: color.g * colorIntensity,
-                b: color.b * colorIntensity
+                r: color.r * brightness,
+                g: color.g * brightness,
+                b: color.b * brightness
             }
         }
 
-        if (x == x1 && y == y1) {
-            break;
-        }
-        e2 = err;
-        if (e2 > -dx) { err -= dy; x += sx; }
-        if (e2 < dy) { err += dx; y += sy; }
     }
-
-    return {r: 0, g: 0, b: 0}
 }
 
 function drawStage2d() {
+
+    //castRay2(player.x, player.y, direction)
+
     let centerX = canvasElem2d.width / 2
     let centerY = canvasElem2d.height / 2
     ctx2d.strokeStyle = "yellow"
@@ -613,21 +571,23 @@ function render() {
     //ctx2d.clearRect(0, 0, canvasElem2d.width, canvasElem2d.height)    ctx1d.beginPath()
     
 
-
+    ctx2d.beginPath()
+        ctx2d.fillStyle = "black"
+        ctx2d.rect(0, 0, canvasElem2d.width, canvasElem2d.height)
+        ctx2d.fill()
     //console.log(castRay(direction))
     render1d()
+    //ctx1d.clearRect(0, 0, canvasElem1d.width, canvasElem1d.height)
 
     if (show2d) {
         ctx2d.beginPath()
         ctx2d.strokeStyle = "white"
-        ctx2d.fillStyle = "black"
-        ctx2d.rect(0, 0, canvasElem2d.width, canvasElem2d.height)
         ctx2d.fill()
         ctx2d.stroke()
         drawStage2d()
         drawPlayer()
     }
-    //ctx1d.clearRect(0, 0, canvasElem1d.width, canvasElem1d.height)
+
 }
 
 function checkCollision(movingHoriz) {
@@ -721,9 +681,39 @@ function update()
 
 }
 
+// fps counter
+// let frameDelays = []
+// let frameSum = 0
+
+let fpsCounterElem = document.getElementById("fpsCounter")
+let lastTime = Date.now()
+
+let physicsDelay = 1000 / 60 // run 60 times per sec
+
+let accumulator = 0
 function runGame() {
+
     render()
-    update()
+
+    let currentTime = Date.now()
+    let delta = currentTime - lastTime
+    lastTime = currentTime
+
+    accumulator += delta
+    while (accumulator > physicsDelay) {
+        accumulator -= physicsDelay
+        update()
+    }
+    
+    // frameDelays.push(delta)
+    // frameSum += delta
+    // if (frameDelays.length == 100) {
+    //     frameSum -= frameDelays[0]
+    //     frameDelays.splice(0, 1)
+    // }
+    // let avg = frameSum / frameDelays.length
+    //fpsCounterElem.innerHTML = (1000 / avg).toFixed(2) + " FPS"
+
     requestAnimationFrame(runGame)
 }
 runGame()
