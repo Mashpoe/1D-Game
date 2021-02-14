@@ -93,9 +93,15 @@ let enemyMax = 16 // keep track of a maximum of 8 enemies
 
 enemies.push({x: 8, y: 4, xVel: 0, yVel: 0, dir: 0})
 
+function clearSelection() {
+    document.activeElement.blur()
+}
+
+
 let anaglyph = false
 function toggleAnaglyph() {
     anaglyph = this.checked
+    clearSelection()
 }
 document.getElementById("anaglyph").onclick = toggleAnaglyph
 toggleAnaglyph.bind(document.getElementById("anaglyph"))()
@@ -104,6 +110,7 @@ let show2d = true
 function toggleDisplay2d() {
     show2d = this.checked
     canvasElem2d.style.display = show2d ? "inline" : "none"
+    clearSelection()
 }
 document.getElementById("show2d").onclick = toggleDisplay2d
 toggleDisplay2d.bind(document.getElementById("show2d"))()
@@ -111,12 +118,13 @@ toggleDisplay2d.bind(document.getElementById("show2d"))()
 let renderQuality = 10
 function updateRenderQuality() {
     renderQuality = this.value
+    clearSelection()
 }
 document.getElementById("quality").onchange = updateRenderQuality
 updateRenderQuality.bind(document.getElementById("quality"))()
 
 function updateCanvasSize() {
-    canvasElem1d.width = Math.min(window.innerWidth, 450)
+    canvasElem1d.width = window.innerWidth
     canvasElem1d.height = canvasElem1d.width / 3
     canvasElem2d.width = Math.min(window.innerWidth, 300)
 }
@@ -126,6 +134,7 @@ updateCanvasSize()
 let texIndex = 0
 function updateWorldTexture() {
     texIndex = parseInt(this.value)
+    clearSelection()
 }
 document.getElementById("texture").onchange = updateWorldTexture
 updateWorldTexture.bind(document.getElementById("texture"))()
@@ -650,7 +659,8 @@ function render1d() {
     ctx1d.rect(0, 0, canvasWidth, canvasHeight)
     ctx1d.fill()
 
-    let resolution = canvasWidth / (10 / renderQuality)
+    let maxRes = 450
+    let resolution = maxRes / (10 / renderQuality)
 
     if (anaglyph) {
         //resolution /= 2
@@ -997,11 +1007,11 @@ function writeEnemyBits(i) {
 function checkBulletCollision(index) {
     let b = bullets[index]
 
-    let leftBoundX = Math.floor(b.x - 0.25)
-    let rightBoundX = Math.ceil(b.x + 0.25)
+    let leftBoundX = Math.floor(b.x - 0.125)
+    let rightBoundX = Math.ceil(b.x + 0.125)
     
-    let topBoundY = Math.floor(b.y - 0.25)
-    let bottomBoundY = Math.ceil(b.y + 0.25)
+    let topBoundY = Math.floor(b.y - 0.125)
+    let bottomBoundY = Math.ceil(b.y + 0.125)
     for (let y = topBoundY; y < bottomBoundY; ++y) {
         for (let x = leftBoundX; x < rightBoundX; ++x) {
             if (world[y][x] > 0) {
