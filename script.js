@@ -32,18 +32,84 @@ let enemyTexture1D = [
     enemyBodyColor
 ]
 
-let playerType = 1
-let player = {x: 1.5, y: 1.5, xVel: 0.0, yVel: 0.0, type: playerType}
-let direction = 0.0 // direction in radians
+let gameOverBackground = {r: 0, g: 0, b: 0}
+let gameOverForeground = {r: 255, g: 255, b: 255}
+let gameOverTexture = [
+    // bg
+    gameOverBackground,
+    gameOverBackground,
+    gameOverBackground,
+    gameOverBackground,
+    gameOverBackground,
+    gameOverBackground,
 
-//let velocity = {x: 0.0, y: 0.0}
-let angVel = 0.0 // angular velocity
+    // game
+    gameOverForeground,
+    gameOverForeground,
+    gameOverBackground,
+    
+    gameOverForeground,
+    gameOverForeground,
+    gameOverBackground,
+    
+    gameOverForeground,
+    gameOverForeground,
+    gameOverBackground,
+    
+    gameOverForeground,
+    gameOverForeground,
+    gameOverBackground,
+
+    // space
+    gameOverBackground,
+    gameOverBackground,
+
+    // over
+    gameOverForeground,
+    gameOverForeground,
+    gameOverBackground,
+    
+    gameOverForeground,
+    gameOverForeground,
+    gameOverBackground,
+    
+    gameOverForeground,
+    gameOverForeground,
+    gameOverBackground,
+    
+    gameOverForeground,
+    gameOverForeground,
+    gameOverBackground,
+
+    // bg
+    gameOverBackground,
+    gameOverBackground,
+    gameOverBackground,
+    gameOverBackground,
+    gameOverBackground,
+    gameOverBackground,
+]
+
+let playerType = 1
+let player = {
+    x: 1.5,
+    y: 1.5,
+    xVel: 0.0,
+    yVel: 0.0,
+    angVel: 0.0, // angular velocity
+    type: playerType,
+    direction: 0.0, // direction in radians
+    cooldown: 0.0, // remaining cooldown time
+    health: 100
+}
 
 let acc = 0.005
 let fric = 0.03
 
 let angAcc = 0.003
 let angFric = 0.05
+
+let hitCooldown = 1500 // cooldown in milliseconds
 
 let bulletSpeed = 0.1
 
@@ -91,7 +157,7 @@ let bulletMax = 8 // keep track of a maximum of 8 bullets
 let enemyOffset = bulletOffset + bulletMax
 let enemyMax = 16 // keep track of a maximum of 8 enemies
 
-enemies.push({x: 8, y: 4, xVel: 0, yVel: 0, dir: 0})
+enemies.push({x: 8, y: 10, xVel: 0, yVel: 0, dir: 0})
 
 function clearSelection() {
     document.activeElement.blur()
@@ -115,6 +181,8 @@ function toggleDisplay2d() {
 document.getElementById("show2d").onclick = toggleDisplay2d
 toggleDisplay2d.bind(document.getElementById("show2d"))()
 
+// render quality/resolution
+let maxRes = 450
 let renderQuality = 10
 function updateRenderQuality() {
     renderQuality = this.value
@@ -123,13 +191,19 @@ function updateRenderQuality() {
 document.getElementById("quality").onchange = updateRenderQuality
 updateRenderQuality.bind(document.getElementById("quality"))()
 
+let bigPicture = true
 function updateCanvasSize() {
-    canvasElem1d.width = window.innerWidth
+    canvasElem1d.width = bigPicture ? window.innerWidth : Math.min(window.innerWidth, 450)
     canvasElem1d.height = canvasElem1d.width / 3
     canvasElem2d.width = Math.min(window.innerWidth, 300)
 }
 window.onresize = updateCanvasSize
-updateCanvasSize()
+function updateBigPicture() {
+    bigPicture = this.checked
+    updateCanvasSize()
+}
+document.getElementById("bigPicture").onchange = updateBigPicture
+updateBigPicture.bind(document.getElementById("bigPicture"))()
 
 let texIndex = 0
 function updateWorldTexture() {
@@ -180,6 +254,7 @@ let buttonL = document.getElementById("buttonL")
 let buttonR = document.getElementById("buttonR")
 let buttonF = document.getElementById("buttonF")
 let buttonB = document.getElementById("buttonB")
+let buttonS = document.getElementById("buttonS")
 // check for touch device
 if (("ontouchstart" in window) ||
     (navigator.maxTouchPoints > 0) ||
@@ -220,11 +295,17 @@ if (("ontouchstart" in window) ||
         keys.backward = false
         this.style.backgroundColor = ""
     }
+
+    buttonS.ontouchstart = function() {
+        keys.shoot = true
+        this.style.backgroundColor = "#555"
+    }
+    buttonS.ontouchend = function() {
+        keys.shoot = false
+        this.style.backgroundColor = ""
+    }
 } else {
-    buttonL.style.display = "none"
-    buttonR.style.display = "none"
-    buttonF.style.display = "none"
-    buttonB.style.display = "none"
+    document.getElementById("buttonContainer").style.display = "none"
 }
 
 function remove(x, y) {
@@ -659,23 +740,21 @@ function render1d() {
     ctx1d.rect(0, 0, canvasWidth, canvasHeight)
     ctx1d.fill()
 
-    let maxRes = 450
     let resolution = maxRes / (10 / renderQuality)
+    let pixelWidth = canvasWidth / resolution
 
     if (anaglyph) {
-        //resolution /= 2
-        let pixelWidth = canvasWidth / resolution
 
         // calculate pupil positions and directions
-        let leftPupilAng = direction - Math.PI / 2
+        let leftPupilAng = player.direction - Math.PI / 2
         let leftPupilX = player.x + Math.cos(leftPupilAng) * 0.1
         let leftPupilY = player.y + Math.sin(leftPupilAng) * 0.1
-        let leftPupilDir = direction + Math.PI / 80
+        let leftPupilDir = player.direction + Math.PI / 80
 
-        let rightPupilAng = direction + Math.PI / 2
+        let rightPupilAng = player.direction + Math.PI / 2
         let rightPupilX = player.x + Math.cos(rightPupilAng) * 0.1
         let rightPupilY = player.y + Math.sin(rightPupilAng) * 0.1
-        let rightPupilDir = direction - Math.PI / 80
+        let rightPupilDir = player.direction - Math.PI / 80
 
         // left eye
         for (let i = 0; i < resolution; ++i) {
@@ -709,10 +788,9 @@ function render1d() {
             ctx1d.fill()
         }
     } else {
-        let pixelWidth = canvasWidth / resolution
 
         for (let i = 0; i < resolution; ++i) {
-            let currentDir = (Math.PI / 2) * (i / resolution - 0.5) + direction
+            let currentDir = (Math.PI / 2) * (i / resolution - 0.5) + player.direction
 
             let color = castRay(player.x, player.y, currentDir)
 
@@ -729,13 +807,26 @@ function render1d() {
             ctx1d.fill()
         }
     }
+
+    // draw damage overlay
+    if (player.cooldown > 0) {
+        ctx1d.beginPath()
+        ctx1d.fillStyle = "rgba(" + player.cooldown / hitCooldown * 255 + ", 0, 0, 0.5)"
+        ctx1d.rect(0, 0, canvasWidth, canvasHeight)
+        ctx1d.fill()
+
+        // if the player is hit, display health bar
+        let healthBarWidth = Math.floor((player.health / 100) * resolution) * pixelWidth
+        ctx1d.beginPath()
+        ctx1d.fillStyle = "rgba(0, 255, 0, 0.5)"
+        ctx1d.rect(0, 0, Math.round(healthBarWidth), canvasHeight)
+        ctx1d.fill()
+    }
 }
 
 
 
 function drawStage2d() {
-
-    //castRay2(player.x, player.y, direction)
 
     let cX = canvasElem2d.width / 2
     let cY = canvasElem2d.height / 2
@@ -748,8 +839,9 @@ function drawStage2d() {
 
     for (let y = 0; y < world.length; ++y) {
         for (let x = 0; x < world[y].length; ++x) {
-            if (world[y][x] != 0) {
-                ctx2d.strokeStyle = world[y][x] > 0 ? "yellow" : "red"
+            if (world[y][x] > 0) {
+                //ctx2d.strokeStyle = world[y][x] > 0 ? "yellow" : "red"
+                ctx2d.strokeStyle = "yellow"
                 ctx2d.beginPath()
                 ctx2d.rect(
                     (x - player.x) * 32 + cX,
@@ -776,7 +868,7 @@ function drawPlayer() {
     // left eye
     ctx2d.fillStyle = "white"
     ctx2d.beginPath()
-    let leftEyeAng = direction - Math.PI / 5
+    let leftEyeAng = player.direction - Math.PI / 5
     let leftEyeX = cX + Math.cos(leftEyeAng) * 6
     let leftEyeY = cY + Math.sin(leftEyeAng) * 6
     ctx2d.arc(leftEyeX, leftEyeY, 3, 0, 2 * Math.PI, false)
@@ -786,7 +878,7 @@ function drawPlayer() {
     // left pupil
     ctx2d.fillStyle = "black"
     ctx2d.beginPath()
-    let leftPupilAng = direction - Math.PI / 6
+    let leftPupilAng = player.direction - Math.PI / 6
     let leftPupilX = cX + Math.cos(leftPupilAng) * 7.5
     let leftPupilY = cY + Math.sin(leftPupilAng) * 7.5
     ctx2d.arc(leftPupilX, leftPupilY, 1.5, 0, 2 * Math.PI, false)
@@ -796,7 +888,7 @@ function drawPlayer() {
     // right eye
     ctx2d.fillStyle = "white"
     ctx2d.beginPath()
-    let rightEyeAng = direction + Math.PI / 5
+    let rightEyeAng = player.direction + Math.PI / 5
     let rightEyeX = cX + Math.cos(rightEyeAng) * 6
     let rightEyeY = cY + Math.sin(rightEyeAng) * 6
     ctx2d.arc(rightEyeX, rightEyeY, 3, 0, 2 * Math.PI, false)
@@ -806,7 +898,7 @@ function drawPlayer() {
     // right pupil
     ctx2d.fillStyle = "black"
     ctx2d.beginPath()
-    let rightPupilAng = direction + Math.PI / 6
+    let rightPupilAng = player.direction + Math.PI / 6
     let rightPupilX = cX + Math.cos(rightPupilAng) * 7.5
     let rightPupilY = cY + Math.sin(rightPupilAng) * 7.5
     ctx2d.arc(rightPupilX, rightPupilY, 1.5, 0, 2 * Math.PI, false)
@@ -866,7 +958,6 @@ function render2d() {
     drawBullets()
     drawPlayer()
     drawEnemies()
-    castRay(player.x, player.y, direction)
 }
 
 function render() {
@@ -877,7 +968,6 @@ function render() {
         render2d()
     }
 
-    //console.log(castRay(direction))
     render1d()
     //ctx1d.clearRect(0, 0, canvasElem1d.width, canvasElem1d.height)
 
@@ -896,16 +986,19 @@ function checkCollision(entity, movingHoriz) {
 
             if (world[y][x] > 0) {
 
-                if (world[y][x] == 2 && entity == player) {
-                    generateWorld(++level + 2)
-                    entity.x = 1.5
-                    entity.y = 1.5
-                    entity.xVel = 0
-                    entity.yVel = 0
-                    angVel = 0
-                    document.getElementById("level").innerHTML = level
-                    maxViewDist = levelMaxViewDist
-                    return;
+                if (entity == player) {
+                    if (world[y][x] == 2) {
+                        generateWorld(++level + 2)
+                        entity.x = 1.5
+                        entity.y = 1.5
+                        entity.xVel = 0
+                        entity.yVel = 0
+                        player.angVel = 0
+                        player.direction = 0
+                        document.getElementById("level").innerHTML = level
+                        maxViewDist = levelMaxViewDist
+                        return
+                    }
                 }
                 
                 if (movingHoriz) {
@@ -923,7 +1016,21 @@ function checkCollision(entity, movingHoriz) {
                     }
                     entity.yVel = 0
                 }
+                return
 
+            } else if (entity != player && player.cooldown == 0) {
+                // the entity is an enemy; check if touching player
+
+                // get the distance between the enemy and the player
+                let xDist = player.x - entity.x
+                let yDist = player.y - entity.y
+                let dist = Math.sqrt(xDist ** 2 + yDist ** 2)
+
+                // check if they are touching
+                if (dist < 0.25 + 0.25) {
+                    player.cooldown = hitCooldown
+                    player.health -= 10
+                }
             }
 
         }
@@ -1071,16 +1178,16 @@ function update(timestep)
     let tr = timestep / stepSt
 
     if (keys.right) {
-        angVel += angAcc * tr
+        player.angVel += angAcc * tr
     } else if (keys.left) {
-        angVel -= angAcc * tr
+        player.angVel -= angAcc * tr
     }
-    angVel *= (1 - angFric * tr)
+    player.angVel *= (1 - angFric * tr)
 
-    direction += angVel * tr
+    player.direction += player.angVel * tr
 
-    let xComp = Math.cos(direction)
-    let yComp = Math.sin(direction)
+    let xComp = Math.cos(player.direction)
+    let yComp = Math.sin(player.direction)
 
     if (keys.forward) {
         player.xVel += xComp * acc * tr
@@ -1103,6 +1210,8 @@ function update(timestep)
 
     player.xVel *= (1 - fric * tr)
     player.yVel *= (1 - fric * tr)
+
+    // check if the player is touching any e
     
     // remaining velocity x and y
     let rvx = Math.abs(player.xVel * tr)
@@ -1127,6 +1236,11 @@ function update(timestep)
             rvy = 0
         }
         checkCollision(player, false)
+    }
+
+    // update damage cooldown
+    if (player.cooldown > 0) {
+        player.cooldown = Math.max(0, player.cooldown - timestep)
     }
 
     // update bullets
@@ -1254,15 +1368,52 @@ function update(timestep)
 }
 
 let lastTime = Date.now()
+let gameOverOpacity = 0
+let gameOverTime = 5000 // animation milliseconds
 function runGame() {
-
-    render()
 
     let currentTime = Date.now()
     let delta = currentTime - lastTime
     lastTime = currentTime
 
-    update(Math.min(delta, 100))
+    if (player.health > 0) {
+        render()
+
+        update(Math.min(delta, 100))
+
+    } else {
+
+        if (gameOverOpacity < 1) {
+            gameOverOpacity = Math.min(1, gameOverOpacity + delta / gameOverTime)
+        }
+
+        render()
+        let resolution = maxRes / (10 / renderQuality)
+        let pixelWidth = canvasElem1d.width / resolution
+        let texPixelWidth = (resolution / gameOverTexture.length) * pixelWidth
+
+        for (let i = 0; i < gameOverTexture.length; ++i) {
+            let startPos = Math.round(i * texPixelWidth)
+            let endPos = Math.round((i + 1) * texPixelWidth)
+            ctx1d.beginPath()
+            let color = "rgba(" +
+                gameOverTexture[i].r + "," +
+                gameOverTexture[i].g + "," +
+                gameOverTexture[i].b + "," +
+                gameOverOpacity + ")"
+            ctx1d.fillStyle = color
+            ctx1d.rect(startPos, 0, endPos - startPos, canvasElem1d.height)
+            ctx1d.fill()
+        }
+
+        if (show2d) {
+            ctx2d.font = "50px Arial";
+            ctx2d.fillStyle = "black"
+            ctx2d.fillText("Game Over", 22, 52); 
+            ctx2d.fillStyle = "white"
+            ctx2d.fillText("Game Over", 20, 50); 
+        }
+    }
 
     requestAnimationFrame(runGame)
 }

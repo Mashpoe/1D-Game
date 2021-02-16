@@ -9,9 +9,9 @@
                 font-family: Arial, Helvetica, sans-serif;
             }
 
-            .buttons {
+            #buttonContainer {
                 font-size: 0px;
-                text-align: right;
+                text-align: left;
             }
 
             .button {
@@ -43,6 +43,14 @@
                 box-sizing: border-box;
                 overflow: hidden;
             }
+
+            #buttonF {
+                float: right;
+            }
+
+            #buttonS .button-icon {
+                transform: rotate(45deg);
+            }
         </style>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -56,7 +64,11 @@
         <br>
         <br>
         <canvas id="canvas1d"></canvas>
-        <div class="buttons">
+        <div id="buttonContainer">
+            <div class="button" id="buttonS">
+                <div class="button-label">shoot</div>
+                <div class="button-icon">⦻</div>
+            </div>
             <div class="button" id="buttonF">
                 <div class="button-label">move forward</div>
                 <div class="button-icon">▲</div>
@@ -75,11 +87,15 @@
             </div>
         </div>
         <br>
+        <br>
         <input type="checkbox" id="anaglyph">
         <label for="anaglyph">3D Anaglyph</label>
         <br>
         <input type="checkbox" id="show2d" checked>
         <label for="show2d">Show 2D Display</label>
+        <br>
+        <input type="checkbox" id="bigPicture" checked>
+        <label for="bigPicture">Big Picture Mode</label>
         <br>
         <lable for="quality">1D Render Quality:</lable>
         <input type="range" min="1" max="10" value="8" class="slider" id="quality">
