@@ -16,7 +16,7 @@ let textures1D = [
     [{r: 255, g: 255, b: 255}, {r: 128, g: 128, b: 128}],
     [{r: 255, g: 255, b: 0}, {r: 128, g: 128, b: 0}],
     [{r: 128, g: 0, b: 0}],
-    [{r: 255, g: 255, b: 255}],
+    [{r: 255, g: 255, b: 255}, {r: 255, g: 255, b: 255}, {r: 0, g: 0, b: 0}, {r: 255, g: 255, b: 255}, {r: 0, g: 0, b: 0}, {r: 0, g: 0, b: 0}, {r: 255, g: 255, b: 255}, {r: 0, g: 0, b: 0}, ],
 ]
 
 let enemyEyeColor = {r: 255, g: 255, b: 255}
@@ -201,6 +201,7 @@ window.onresize = updateCanvasSize
 function updateBigPicture() {
     bigPicture = this.checked
     updateCanvasSize()
+    clearSelection()
 }
 document.getElementById("bigPicture").onchange = updateBigPicture
 updateBigPicture.bind(document.getElementById("bigPicture"))()
