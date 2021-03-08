@@ -261,6 +261,7 @@ if (("ontouchstart" in window) ||
     (navigator.maxTouchPoints > 0) ||
     (navigator.msMaxTouchPoints > 0))
 {
+    document.getElementById("controls").style.display = "none"
     buttonL.ontouchstart = function() {
         keys.left = true
         this.style.backgroundColor = "#555"
