@@ -159,6 +159,17 @@ let enemyMax = 16 // keep track of a maximum of 8 enemies
 
 enemies.push({x: 8, y: 10, xVel: 0, yVel: 0, dir: 0})
 
+let keys = {
+    forward: false,
+    backward: false,
+    left: false,
+    right: false,
+    turnLeft: false,
+    turnRight: false,
+    shoot: false
+}
+
+
 function clearSelection() {
     document.activeElement.blur()
 }
@@ -180,6 +191,18 @@ function toggleDisplay2d() {
 }
 document.getElementById("show2d").onclick = toggleDisplay2d
 toggleDisplay2d.bind(document.getElementById("show2d"))()
+
+let strafeControls = false
+function toggleStrafeControls() {
+    strafeControls = this.checked
+    if (!this.checked) {
+        keys.left = false
+        keys.right = false
+    }
+}
+document.getElementById("strafeControls").onclick = toggleStrafeControls
+toggleStrafeControls.bind(document.getElementById("strafeControls"))()
+
 
 // render quality/resolution
 let maxRes = 450
@@ -214,8 +237,6 @@ function updateWorldTexture() {
 document.getElementById("texture").onchange = updateWorldTexture
 updateWorldTexture.bind(document.getElementById("texture"))()
 
-let keys = {forward: false, backward: false, left: false, right: false, shoot: false}
-
 function updateKey(keyCode, value) {
     switch (keyCode) {
         case 38: // up key
@@ -227,12 +248,16 @@ function updateKey(keyCode, value) {
             keys.backward = value;
             break;
         case 37: // left key
-        case 65: // A key; fallthrough
-            keys.left = value;
+            keys.turnLeft = value;
+            break;
+        case 65: // A key
+            keys[strafeControls ? "left" : "turnLeft"] = value;
             break;
         case 39: // right key
-        case 68: // D key; fallthrough
-            keys.right = value;
+            keys.turnRight = value;
+            break;
+        case 68: // D key
+            keys[strafeControls ? "right" : "turnRight"] = value;
             break;
         case 32: // space key
         case 90: // Z key; fallthrough
@@ -263,11 +288,11 @@ if (("ontouchstart" in window) ||
 {
     document.getElementById("controls").style.display = "none"
     buttonL.ontouchstart = function() {
-        keys.left = true
+        keys.turnLeft = true
         this.style.backgroundColor = "#555"
     }
     buttonL.ontouchend = function() {
-        keys.left = false
+        keys.turnLeft = false
         this.style.backgroundColor = ""
     }
 
@@ -1179,25 +1204,36 @@ function update(timestep)
     // timestep ratio
     let tr = timestep / stepSt
 
-    if (keys.right) {
-        player.angVel += angAcc * tr
-    } else if (keys.left) {
-        player.angVel -= angAcc * tr
-    }
-    player.angVel *= (1 - angFric * tr)
-
-    player.direction += player.angVel * tr
-
     let xComp = Math.cos(player.direction)
     let yComp = Math.sin(player.direction)
 
     if (keys.forward) {
         player.xVel += xComp * acc * tr
         player.yVel += yComp * acc * tr
-    } else if (keys.backward) {
+    }
+    if (keys.backward) {
         player.xVel -= xComp * acc / 2 * tr
         player.yVel -= yComp * acc / 2 * tr
     }
+
+    if (keys.right) {
+        player.xVel -= yComp * acc * tr
+        player.yVel += xComp * acc * tr
+    }
+    if (keys.left) {
+        player.xVel += yComp * acc * tr
+        player.yVel -= xComp * acc * tr
+    }
+
+    if (keys.turnRight) {
+        player.angVel += angAcc * tr
+    }
+    if (keys.turnLeft) {
+        player.angVel -= angAcc * tr
+    }
+    player.angVel *= (1 - angFric * tr)
+
+    player.direction += player.angVel * tr
 
     if (keys.shoot && bullets.length < bulletMax) {
         keys.shoot = false;
