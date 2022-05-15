@@ -203,6 +203,21 @@ function updateStrafeControls() {
 document.getElementById("strafeControls").onclick = updateStrafeControls
 updateStrafeControls.bind(document.getElementById("strafeControls"))()
 
+function updateAcceleration() {
+    if (this.value === '2') {
+        acc = 0.1
+        fric = 0.6
+        angAcc = 0.03
+        angFric = 0.5
+    } else {
+        acc = 0.005
+        fric = 0.03
+        angAcc = 0.003
+        angFric = 0.05
+    }
+}
+document.getElementById("acceleration").onchange = updateAcceleration
+updateAcceleration.bind(document.getElementById("acceleration"))()
 
 // render quality/resolution
 let maxRes = 450
@@ -1226,23 +1241,25 @@ function update(timestep)
 
     let xComp = Math.cos(player.direction)
     let yComp = Math.sin(player.direction)
+    let xVel = xComp * acc * tr
+    let yVel = yComp * acc * tr
 
     if (keys.forward) {
-        player.xVel += xComp * acc * tr
-        player.yVel += yComp * acc * tr
+        player.xVel += xVel
+        player.yVel += yVel
     }
     if (keys.backward) {
-        player.xVel -= xComp * acc / 2 * tr
-        player.yVel -= yComp * acc / 2 * tr
+        player.xVel -= xVel * 0.75
+        player.yVel -= yVel * 0.75
     }
 
     if (keys.right) {
-        player.xVel -= yComp * acc * tr
-        player.yVel += xComp * acc * tr
+        player.xVel -= yVel
+        player.yVel += xVel
     }
     if (keys.left) {
-        player.xVel += yComp * acc * tr
-        player.yVel -= xComp * acc * tr
+        player.xVel += yVel
+        player.yVel -= xVel
     }
 
     if (keys.turnRight) {
