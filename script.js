@@ -281,6 +281,8 @@ let buttonR = document.getElementById("buttonR")
 let buttonF = document.getElementById("buttonF")
 let buttonB = document.getElementById("buttonB")
 let buttonS = document.getElementById("buttonS")
+let buttonTL = document.getElementById("buttonTL")
+let buttonTR = document.getElementById("buttonTR")
 // check for touch device
 if (("ontouchstart" in window) ||
     (navigator.maxTouchPoints > 0) ||
@@ -288,11 +290,11 @@ if (("ontouchstart" in window) ||
 {
     document.getElementById("controls").style.display = "none"
     buttonL.ontouchstart = function() {
-        keys.turnLeft = true
+        keys.left = true
         this.style.backgroundColor = "#555"
     }
     buttonL.ontouchend = function() {
-        keys.turnLeft = false
+        keys.left = false
         this.style.backgroundColor = ""
     }
 
@@ -329,6 +331,24 @@ if (("ontouchstart" in window) ||
     }
     buttonS.ontouchend = function() {
         keys.shoot = false
+        this.style.backgroundColor = ""
+    }
+
+    buttonTL.ontouchstart = function() {
+        keys.turnLeft = true
+        this.style.backgroundColor = "#555"
+    }
+    buttonTL.ontouchend = function() {
+        keys.turnLeft = false
+        this.style.backgroundColor = ""
+    }
+
+    buttonTR.ontouchstart = function() {
+        keys.turnRight = true
+        this.style.backgroundColor = "#555"
+    }
+    buttonTR.ontouchend = function() {
+        keys.turnRight = false
         this.style.backgroundColor = ""
     }
 } else {
