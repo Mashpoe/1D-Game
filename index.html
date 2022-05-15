@@ -116,8 +116,12 @@
         <input type="checkbox" id="bigPicture" checked>
         <label for="bigPicture">Big Picture Mode</label>
         <br>
-        <input type="checkbox" id="strafeControls" checked>
-        <label for="strafeControls">Strafe Controls</label>
+        <label for="strafeControls">Strafe with:</label>
+        <select id="strafeControls">
+            <option value="0">A/D</option>
+            <option value="1">left/right arrow</option>
+            <option value="2">Neither</option>
+        </select>
         <br>
         <label for="quality">1D Render Quality:</label>
         <input type="range" min="1" max="10" value="8" class="slider" id="quality">

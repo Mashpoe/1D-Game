@@ -192,16 +192,16 @@ function toggleDisplay2d() {
 document.getElementById("show2d").onclick = toggleDisplay2d
 toggleDisplay2d.bind(document.getElementById("show2d"))()
 
-let strafeControls = false
-function toggleStrafeControls() {
-    strafeControls = this.checked
-    if (!this.checked) {
+let strafeControls = 0
+function updateStrafeControls() {
+    strafeControls = parseInt(this.value)
+    if (strafeControls === 2) {
         keys.left = false
         keys.right = false
     }
 }
-document.getElementById("strafeControls").onclick = toggleStrafeControls
-toggleStrafeControls.bind(document.getElementById("strafeControls"))()
+document.getElementById("strafeControls").onclick = updateStrafeControls
+updateStrafeControls.bind(document.getElementById("strafeControls"))()
 
 
 // render quality/resolution
@@ -248,16 +248,16 @@ function updateKey(keyCode, value) {
             keys.backward = value;
             break;
         case 37: // left key
-            keys.turnLeft = value;
+            keys[strafeControls === 1 ? "left" : "turnLeft"] = value;
             break;
         case 65: // A key
-            keys[strafeControls ? "left" : "turnLeft"] = value;
+            keys[strafeControls === 0 ? "left" : "turnLeft"] = value;
             break;
         case 39: // right key
-            keys.turnRight = value;
+            keys[strafeControls === 1 ? "right" : "turnRight"] = value;
             break;
         case 68: // D key
-            keys[strafeControls ? "right" : "turnRight"] = value;
+            keys[strafeControls === 0 ? "right" : "turnRight"] = value;
             break;
         case 32: // space key
         case 90: // Z key; fallthrough
