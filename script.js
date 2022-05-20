@@ -4,7 +4,7 @@ canvasElem2d.height = "150"
 
 let canvasElem1d = document.getElementById("canvas1d")
 canvasElem1d.width = "600"
-canvasElem1d.height = "200"
+canvasElem1d.height = "200" 
 
 let ctx2d = canvasElem2d.getContext("2d")
 let ctx1d = canvasElem1d.getContext("2d")
@@ -238,6 +238,9 @@ function updateKey(keyCode, value) {
         case 90: // Z key; fallthrough
         case 88: // X key; fallthrough
             keys.shoot = value;
+            break;
+        case 73: // restart hp
+            keys.g = value;
             break;
     }
 }
@@ -676,7 +679,7 @@ function castRay(px, py, dir) {
                     // ctx2d.fill()
         
                     // ctx2d.beginPath()
-                    // ctx2d.strokeStyle = "red"
+                    // ctx2d.strokeStyle = "purple"
                     // ctx2d.moveTo(cX, cY)
                     // ctx2d.lineTo(cX + (xInt - player.x) * 32, cY + (yInt - player.y) * 32)
                     // ctx2d.stroke()
@@ -1213,7 +1216,7 @@ function update(timestep)
     player.xVel *= (1 - fric * tr)
     player.yVel *= (1 - fric * tr)
 
-    // check if the player is touching any e
+    // check if the player is touching any enemy
     
     // remaining velocity x and y
     let rvx = Math.abs(player.xVel * tr)
