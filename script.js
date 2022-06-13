@@ -47,15 +47,15 @@ let gameOverTexture = [
     gameOverForeground,
     gameOverForeground,
     gameOverBackground,
-    
+
     gameOverForeground,
     gameOverForeground,
     gameOverBackground,
-    
+
     gameOverForeground,
     gameOverForeground,
     gameOverBackground,
-    
+
     gameOverForeground,
     gameOverForeground,
     gameOverBackground,
@@ -68,15 +68,15 @@ let gameOverTexture = [
     gameOverForeground,
     gameOverForeground,
     gameOverBackground,
-    
+
     gameOverForeground,
     gameOverForeground,
     gameOverBackground,
-    
+
     gameOverForeground,
     gameOverForeground,
     gameOverBackground,
-    
+
     gameOverForeground,
     gameOverForeground,
     gameOverBackground,
@@ -171,6 +171,30 @@ function toggleAnaglyph() {
 }
 document.getElementById("anaglyph").onclick = toggleAnaglyph
 toggleAnaglyph.bind(document.getElementById("anaglyph"))()
+
+let crossview = false
+function toggleCrossview() {
+    crossview = this.checked
+    clearSelection()
+}
+document.getElementById("crossview").onclick = toggleCrossview
+toggleCrossview.bind(document.getElementById("crossview"))
+
+let parallelView = false
+function toggleParallelView() {
+    parallelView = this.checked
+    clearSelection()
+}
+document.getElementById("parallelview").onclick = toggleParallelView
+toggleParallelView.bind(document.getElementById("parallelview"))
+
+let renderDots = false
+function toggleRenderDots() {
+    renderDots = this.checked
+    clearSelection()
+}
+document.getElementById("renderdots").onclick = toggleRenderDots
+toggleRenderDots.bind(document.getElementById("renderdots"))
 
 let show2d = true
 function toggleDisplay2d() {
@@ -508,7 +532,7 @@ function castRay(px, py, dir) {
 
         // let cX = canvasElem2d.width / 2
         // let cY = canvasElem2d.height / 2
-        
+
         // ctx2d.beginPath()
         // ctx2d.fillStyle = "orange"
         // ctx2d.rect(cX + (bx - player.x) * 32, cY + (by - player.y) * 32, 32, 32)
@@ -523,7 +547,7 @@ function castRay(px, py, dir) {
         if (world[by][bx] == 2) {
             return portalColor
         }
-        
+
         let color = null
         // a negative tile indicates there are entities inside
         if (world[by][bx] < 0) {
@@ -602,11 +626,11 @@ function castRay(px, py, dir) {
                     // use player.x instead of px for 3D anaglyph
                     let eDistX = e.x - player.x
                     let eDistY = e.y - player.y
-        
-        
+
+
                     // let cX = canvasElem2d.width / 2
                     // let cY = canvasElem2d.height / 2
-        
+
                     // calculate where the two lines intersect
                     if (eDistX == 0) {
                         // player x == enemy x
@@ -619,17 +643,17 @@ function castRay(px, py, dir) {
                     } else {
                         // find distance between player and enemy
                         let eDist = Math.sqrt(eDistX ** 2 + eDistY ** 2)
-        
+
                         // find the perpendicular angle
                         let xCompE = -eDistY / eDist // -sin
                         let yCompE = eDistX / eDist // cos
-        
+
                         let a1 = -yComp
                         let b1 = xComp
-        
+
                         let a2 = -yCompE
                         let b2 = xCompE
-        
+
                         // ctx2d.beginPath()
                         // ctx2d.strokeStyle = "yellow"
                         // let startX = e.x + (-3 * xCompE)
@@ -639,7 +663,7 @@ function castRay(px, py, dir) {
                         // let endY = e.y + (3 * yCompE)
                         // ctx2d.lineTo(cX + (endX - player.x) * 32, cY + (endY - player.y) * 32)
                         // ctx2d.stroke()
-        
+
                         // ctx2d.beginPath()
                         // ctx2d.strokeStyle = "yellow"
                         // startX = px + (-3 * xComp)
@@ -649,45 +673,45 @@ function castRay(px, py, dir) {
                         // endY = py + (3 * yComp)
                         // ctx2d.lineTo(cX + (endX - player.x) * 32, cY + (endY - player.y) * 32)
                         // ctx2d.stroke()
-        
+
                         // find c values for both lines in the form ax + by = c
                         let c1 = a1 * px + b1 * py
                         let c2 = a2 * e.x + b2 * e.y
-        
+
                         //console.log((a1 * c2 - a2 * c1) / (a1 * b2 - a2 * b1) + ", " + py)
-        
+
                         // let c1 = xComp * e.x + yComp * e.y
                         // let c2 = xCompE * px + yCompE * py
-        
+
                         // compute the intersection x and y
                         yInt = (a2 * c1 - a1 * c2) / (a2 * b1 - a1 * b2)
                         xInt = e.x + (yInt - e.y) * (xCompE / yCompE)
-        
+
                         //console.log(xInt + ", " + yInt)
                         // let temp = yInt
                         // yInt = xInt
                         // xInt = temp
                     }
-        
-                    
+
+
                     // ctx2d.beginPath()
                     // ctx2d.fillStyle = "orange"
                     // ctx2d.rect(cX + (bx - player.x) * 32, cY + (by - player.y) * 32, 32, 32)
                     // ctx2d.fill()
-        
+
                     // ctx2d.beginPath()
                     // ctx2d.strokeStyle = "red"
                     // ctx2d.moveTo(cX, cY)
                     // ctx2d.lineTo(cX + (xInt - player.x) * 32, cY + (yInt - player.y) * 32)
                     // ctx2d.stroke()
-        
+
                     // find distance between enemy and interception
                     let dist = Math.sqrt((xInt - e.x) ** 2 + (yInt - e.y) ** 2)
-        
+
                     if (dist > 0.25) {
                         continue
                     }
-        
+
                     let colorIndex = Math.floor(dist / 0.25 * enemyTexture1D.length)
                     color = enemyTexture1D[colorIndex]
 
@@ -745,49 +769,129 @@ function render1d() {
     let resolution = maxRes / (10 / renderQuality)
     let pixelWidth = canvasWidth / resolution
 
-    if (anaglyph) {
+    if (anaglyph || crossview || parallelView) {
 
         // calculate pupil positions and directions
         let leftPupilAng = player.direction - Math.PI / 2
+        let rightPupilAng = player.direction + Math.PI / 2
+
+        if(parallelView)
+        {
+            [leftPupilAng, rightPupilAng] = [rightPupilAng, leftPupilAng]
+        }
+
         let leftPupilX = player.x + Math.cos(leftPupilAng) * 0.1
         let leftPupilY = player.y + Math.sin(leftPupilAng) * 0.1
         let leftPupilDir = player.direction + Math.PI / 80
 
-        let rightPupilAng = player.direction + Math.PI / 2
         let rightPupilX = player.x + Math.cos(rightPupilAng) * 0.1
         let rightPupilY = player.y + Math.sin(rightPupilAng) * 0.1
         let rightPupilDir = player.direction - Math.PI / 80
 
-        // left eye
-        for (let i = 0; i < resolution; ++i) {
-            let currentDir = (Math.PI / 3) * (i / resolution - 0.5) + leftPupilDir
+        if(anaglyph) {
 
-            let color = castRay(leftPupilX, leftPupilY, currentDir)
+            // left eye
+            for (let i = 0; i < resolution; ++i) {
+                let currentDir = (Math.PI / 3) * (i / resolution - 0.5) + leftPupilDir
 
-            ctx1d.beginPath()
-            ctx1d.fillStyle = "rgb(" + color.r + ",0,0)"
+                let color = castRay(leftPupilX, leftPupilY, currentDir)
+
+                ctx1d.beginPath()
+                ctx1d.fillStyle = "rgb(" + color.r + ",0,0)"
 
 
-            let startPos = Math.round(i * pixelWidth)
-            let endPos = Math.round((i + 1) * pixelWidth)
+                let startPos = Math.round(i * pixelWidth)
+                let endPos = Math.round((i + 1) * pixelWidth)
 
-            ctx1d.rect(startPos, 0, endPos - startPos, canvasHeight)
-            ctx1d.fill()
-        }
-        // right eye
-        for (let i = 0; i < resolution; ++i) {
-            let currentDir = (Math.PI / 3) * (i / resolution - 0.5) + rightPupilDir
+                ctx1d.rect(startPos, 0, endPos - startPos, canvasHeight)
+                ctx1d.fill()
+            }
+            // right eye
+            for (let i = 0; i < resolution; ++i) {
+                let currentDir = (Math.PI / 3) * (i / resolution - 0.5) + rightPupilDir
 
-            let color = castRay(rightPupilX, rightPupilY, currentDir)
+                let color = castRay(rightPupilX, rightPupilY, currentDir)
 
-            ctx1d.beginPath()
-            ctx1d.fillStyle = "rgba(0," + color.g + "," + color.b + ",0.5)"
+                ctx1d.beginPath()
+                ctx1d.fillStyle = "rgba(0," + color.g + "," + color.b + ",0.5)"
 
-            let startPos = Math.round(i * pixelWidth)
-            let endPos = Math.round((i + 1) * pixelWidth)
+                let startPos = Math.round(i * pixelWidth)
+                let endPos = Math.round((i + 1) * pixelWidth)
 
-            ctx1d.rect(startPos, 0, endPos - startPos, canvasHeight)
-            ctx1d.fill()
+                ctx1d.rect(startPos, 0, endPos - startPos, canvasHeight)
+                ctx1d.fill()
+            }
+        } else {
+            // left eye
+            let dotColor = null
+
+            for (let i = 0; i < resolution; ++i) {
+                let currentDir = (Math.PI / 3) * (i / resolution - 0.5) + leftPupilDir
+
+                let color = castRay(leftPupilX, leftPupilY, currentDir)
+
+                ctx1d.beginPath()
+                ctx1d.fillStyle = "rgb(" +
+                    color.r + "," +
+                    color.g + "," +
+                    color.b + ")"
+
+                if(i == Math.round(resolution / 2))
+                {
+                    dotColor = color
+                }
+
+                let startPos = i * pixelWidth
+                let endPos = (i + 1) * pixelWidth
+
+                startPos = Math.round(0.5 * startPos + 0.5 * canvasWidth);
+                endPos = Math.round(0.5 * endPos + 0.5 * canvasWidth);
+                console.log(pixelWidth)
+
+                ctx1d.rect(startPos, 0, endPos - startPos, canvasHeight)
+                ctx1d.fill()
+            }
+            // right eye
+            for (let i = 0; i < resolution; ++i) {
+                let currentDir = (Math.PI / 3) * (i / resolution - 0.5) + rightPupilDir
+
+                let color = castRay(rightPupilX, rightPupilY, currentDir)
+
+
+                ctx1d.beginPath()
+                ctx1d.fillStyle = "rgb(" +
+                    color.r + "," +
+                    color.g + "," +
+                    color.b + ")"
+
+                let startPos = i * pixelWidth
+                let endPos = (i + 1) * pixelWidth
+
+                startPos = Math.round(0.5 * startPos)
+                endPos = Math.round(0.5 * endPos)
+
+                ctx1d.rect(startPos, 0, endPos - startPos, canvasHeight)
+                ctx1d.fill()
+            }
+
+            if(renderDots)
+            {
+                let dotSize = 0.02 * canvasHeight
+                let virtualDotStart = 0.5 * canvasWidth - 0.5 * dotSize
+
+                ctx1d.fillStyle = "rgb(" +
+                (255 - dotColor.r) + "," +
+                (255 - dotColor.g) + "," +
+                (255 - dotColor.b) + ")"
+
+                let y = 0.5 * (canvasHeight - dotSize)
+
+                ctx1d.rect(0.5 * virtualDotStart, y, dotSize, dotSize)
+                ctx1d.fill()
+
+                ctx1d.rect(1.5 * virtualDotStart, y, dotSize, dotSize)
+                ctx1d.fill()
+            }
         }
     } else {
 
@@ -801,7 +905,7 @@ function render1d() {
                 color.r + "," +
                 color.g + "," +
                 color.b + ")"
-            
+
             let startPos = Math.round(i * pixelWidth)
             let endPos = Math.round((i + 1) * pixelWidth)
 
@@ -964,7 +1068,7 @@ function render2d() {
 
 function render() {
     //ctx2d.clearRect(0, 0, canvasElem2d.width, canvasElem2d.height)    ctx1d.beginPath()
-    
+
 
     if (show2d) {
         render2d()
@@ -980,7 +1084,7 @@ function checkCollision(entity, movingHoriz) {
     // check for collisions
     let leftBoundX = Math.floor(entity.x - 0.25)
     let rightBoundX = Math.ceil(entity.x + 0.25)
-    
+
     let topBoundY = Math.floor(entity.y - 0.25)
     let bottomBoundY = Math.ceil(entity.y + 0.25)
     for (let y = topBoundY; y < bottomBoundY; ++y) {
@@ -1002,7 +1106,7 @@ function checkCollision(entity, movingHoriz) {
                         return
                     }
                 }
-                
+
                 if (movingHoriz) {
                     if (entity.xVel > 0) {
                         entity.x = x - 0.25
@@ -1118,7 +1222,7 @@ function checkBulletCollision(index) {
 
     let leftBoundX = Math.floor(b.x - 0.125)
     let rightBoundX = Math.ceil(b.x + 0.125)
-    
+
     let topBoundY = Math.floor(b.y - 0.125)
     let bottomBoundY = Math.ceil(b.y + 0.125)
     for (let y = topBoundY; y < bottomBoundY; ++y) {
@@ -1163,7 +1267,7 @@ function checkBulletCollision(index) {
                         return true
                     }
                 }
-                
+
             }
         }
     }
@@ -1214,7 +1318,7 @@ function update(timestep)
     player.yVel *= (1 - fric * tr)
 
     // check if the player is touching any e
-    
+
     // remaining velocity x and y
     let rvx = Math.abs(player.xVel * tr)
     let rvy = Math.abs(player.yVel * tr)
@@ -1411,9 +1515,9 @@ function runGame() {
         if (show2d) {
             ctx2d.font = "50px Arial";
             ctx2d.fillStyle = "black"
-            ctx2d.fillText("Game Over", 22, 52); 
+            ctx2d.fillText("Game Over", 22, 52);
             ctx2d.fillStyle = "white"
-            ctx2d.fillText("Game Over", 20, 50); 
+            ctx2d.fillText("Game Over", 20, 50);
         }
     }
 
