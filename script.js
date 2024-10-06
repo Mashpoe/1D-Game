@@ -1172,6 +1172,25 @@ function checkBulletCollision(index) {
 
 let brightenPortal = false
 
+// Request pointer lock when the canvas is clicked
+canvasElem1d.addEventListener('click', () => {
+    canvasElem1d.requestPointerLock();
+});
+
+// Listen for pointer lock changes
+document.addEventListener('pointerlockchange', () => {
+    if (document.pointerLockElement === canvasElem1d) {
+        document.addEventListener('mousemove', updatePlayerDirection);
+    } else {
+        document.removeEventListener('mousemove', updatePlayerDirection);
+    }
+    
+    function updatePlayerDirection(event) {
+        player.direction += event.movementX * 0.001; 
+    }
+});
+
+
 // the standard timestep
 let stepSt = 20
 function update(timestep)
@@ -1197,6 +1216,16 @@ function update(timestep)
     } else if (keys.backward) {
         player.xVel -= xComp * acc / 2 * tr
         player.yVel -= yComp * acc / 2 * tr
+    }
+
+    let xCompPer = Math.cos(player.direction - Math.PI / 2)
+    let yCompPer = Math.sin(player.direction - Math.PI / 2)
+    if (keys.left) {
+        player.xVel += xCompPer * acc * tr
+        player.yVel += yCompPer * acc * tr
+    } else if (keys.right) {
+        player.xVel -= xCompPer * acc * tr
+        player.yVel -= yCompPer * acc * tr
     }
 
     if (keys.shoot && bullets.length < bulletMax) {
