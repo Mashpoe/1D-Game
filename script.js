@@ -227,12 +227,14 @@ function updateKey(keyCode, value) {
             keys.backward = value;
             break;
         case 37: // left key
-        keys.turnLeft = value;
+            keys.turnLeft = value;
+            break;
         case 65: // A key; fallthrough
             keys.left = value;
             break;
         case 39: // right key
-        keys.turnRight = value;
+            keys.turnRight = value;
+            break;
         case 68: // D key; fallthrough
             keys.right = value;
             break;
