@@ -214,7 +214,7 @@ function updateWorldTexture() {
 document.getElementById("texture").onchange = updateWorldTexture
 updateWorldTexture.bind(document.getElementById("texture"))()
 
-let keys = {forward: false, backward: false, left: false, right: false, shoot: false}
+let keys = {forward: false, backward: false, left: false, right: false, turnLeft: false, turnRight: false, shoot: false}
 
 function updateKey(keyCode, value) {
     switch (keyCode) {
@@ -227,10 +227,14 @@ function updateKey(keyCode, value) {
             keys.backward = value;
             break;
         case 37: // left key
+            keys.turnLeft = value;
+            break;
         case 65: // A key; fallthrough
             keys.left = value;
             break;
         case 39: // right key
+            keys.turnRight = value;
+            break;
         case 68: // D key; fallthrough
             keys.right = value;
             break;
@@ -263,20 +267,20 @@ if (("ontouchstart" in window) ||
 {
     document.getElementById("controls").style.display = "none"
     buttonL.ontouchstart = function() {
-        keys.left = true
+        keys.turnLeft = true
         this.style.backgroundColor = "#555"
     }
     buttonL.ontouchend = function() {
-        keys.left = false
+        keys.turnLeft = false
         this.style.backgroundColor = ""
     }
 
     buttonR.ontouchstart = function() {
-        keys.right = true
+        keys.turnRight = true
         this.style.backgroundColor = "#555"
     }
     buttonR.ontouchend = function() {
-        keys.right = false
+        keys.turnRight = false
         this.style.backgroundColor = ""
     }
 
@@ -1172,6 +1176,25 @@ function checkBulletCollision(index) {
 
 let brightenPortal = false
 
+// Request pointer lock when the canvas is clicked
+canvasElem1d.addEventListener('click', () => {
+    canvasElem1d.requestPointerLock({unadjustedMovement: true});
+});
+
+// Listen for pointer lock changes
+document.addEventListener('pointerlockchange', () => {
+    if (document.pointerLockElement === canvasElem1d) {
+        document.addEventListener('mousemove', updatePlayerDirection);
+    } else {
+        document.removeEventListener('mousemove', updatePlayerDirection);
+    }
+    
+});
+
+function updatePlayerDirection(event) {
+    player.direction += event.movementX * 0.001; 
+}
+
 // the standard timestep
 let stepSt = 20
 function update(timestep)
@@ -1179,9 +1202,9 @@ function update(timestep)
     // timestep ratio
     let tr = timestep / stepSt
 
-    if (keys.right) {
+    if (keys.turnRight) {
         player.angVel += angAcc * tr
-    } else if (keys.left) {
+    } else if (keys.turnLeft) {
         player.angVel -= angAcc * tr
     }
     player.angVel *= (1 - angFric * tr)
@@ -1197,6 +1220,16 @@ function update(timestep)
     } else if (keys.backward) {
         player.xVel -= xComp * acc / 2 * tr
         player.yVel -= yComp * acc / 2 * tr
+    }
+
+    let xCompPer = Math.cos(player.direction - Math.PI / 2)
+    let yCompPer = Math.sin(player.direction - Math.PI / 2)
+    if (keys.left) {
+        player.xVel += xCompPer * acc * tr
+        player.yVel += yCompPer * acc * tr
+    } else if (keys.right) {
+        player.xVel -= xCompPer * acc * tr
+        player.yVel -= yCompPer * acc * tr
     }
 
     if (keys.shoot && bullets.length < bulletMax) {
